@@ -2,26 +2,31 @@ import React, { useState } from "react";
 import "./App.css";
 
 const App = () => {
+  const predefinedExtensions = [".txt", ".jpg", ".png", ".pdf", ".docx"];
   const [extensions, setExtensions] = useState([]);
-  const [input, setInput] = useState("");
+  const [customInput, setCustomInput] = useState("");
+  const [selectedOption, setSelectedOption] = useState("");
 
-  // Add a new extension
+  // Add a new extension (either from the dropdown or custom input)
   const handleAddExtension = () => {
-    if (input && !extensions.includes(input)) {
-      const newExtensions = [...extensions, input];
-      setExtensions(newExtensions);
-      sendMessageToBackground(newExtensions);
-      sendMessageToContent(newExtensions);
-      setInput("");
+    let newExtension = selectedOption || customInput.trim();
+    if (newExtension && !extensions.includes(newExtension)) {
+      const updatedExtensions = [...extensions, newExtension];
+      console.log(updatedExtensions)
+      setExtensions(updatedExtensions);
+      sendMessageToBackground(updatedExtensions);
+      sendMessageToContent(updatedExtensions);
+      setCustomInput("");
+      setSelectedOption("");
     }
   };
 
   // Remove an extension
   const handleRemoveExtension = (ext) => {
-    const newExtensions = extensions.filter((e) => e !== ext);
-    setExtensions(newExtensions);
-    sendMessageToBackground(newExtensions);
-    sendMessageToContent(newExtensions);
+    const updatedExtensions = extensions.filter((e) => e !== ext);
+    setExtensions(updatedExtensions);
+    sendMessageToBackground(updatedExtensions);
+    sendMessageToContent(updatedExtensions);
   };
 
   // Send a message to background.js
@@ -40,13 +45,24 @@ const App = () => {
 
   return (
     <div className="app">
-      <h1>Manage File Extensions</h1>
+      <h1>Manage Extensions</h1>
       <div className="input-container">
+        <select
+          value={selectedOption}
+          onChange={(e) => setSelectedOption(e.target.value)}
+        >
+          <option value="">Select an extension</option>
+          {predefinedExtensions.map((ext, index) => (
+            <option key={index} value={ext}>
+              {ext}
+            </option>
+          ))}
+        </select>
         <input
           type="text"
-          placeholder="Enter file extension (e.g., .txt)"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          placeholder="Custom extension (e.g., .csv)"
+          value={customInput}
+          onChange={(e) => setCustomInput(e.target.value)}
         />
         <button onClick={handleAddExtension}>Add</button>
       </div>

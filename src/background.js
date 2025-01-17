@@ -1,10 +1,5 @@
-const blockedExtensions = [".pdf", ".docx", ".xls"]; 
+let blockedExtensions = [".pdf", ".docx", ".xls"]; 
 const approvedWebsites = ["https://example.com"]; 
-const blockedSites = [
-  'example.com',
-  'blocked-site.com',
-  // Add more sites as needed
-];
 
 
 chrome.downloads.onCreated.addListener((downloadItem) => {
@@ -27,16 +22,6 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
         console.error("Unexpected error:", error.message);
     }
   
-});
-
-function isBlockedSite(url) {
-  return blockedSites.some(site => url.includes(site));
-}
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'CHECK_URL') {
-    sendResponse({ isBlocked: isBlockedSite(sender.tab.url) });
-  }
 });
 
 // Get the file extension
@@ -72,7 +57,14 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "UPDATE_EXTENSIONS") {
-    console.log("Updated extensions in background:", message.data);
-    // You can handle logic for background.js here
+    blockedExtensions = message.data; // Update the global extensions list
+    console.log("Updated extensions in background.js:", blockedExtensions);
+
+    // Store the updated extensions in Chrome's storage
+    chrome.storage.local.set({ blockedExtensions }, () => {
+      console.log("Extensions saved to storage:", blockedExtensions);
+    });
+
+    sendResponse({ success: true });
   }
 });

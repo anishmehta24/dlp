@@ -1,9 +1,11 @@
-const blockedExtensions = [".pdf", ".docx", ".xls"]; 
+let blockedExtensions = [".pdf", ".docx", ".xls",".jpg",".png",".jpeg"]; 
 const allowedWebsites = ["*://*/*"];
 
 const currentURL = window.location.href;
 
+
 const isAllowedWebsite = allowedWebsites.some((site) => currentURL.includes(site));
+
 
 if (!isAllowedWebsite) {
   const links = document.querySelectorAll('a[href]'); // Find all links
@@ -20,22 +22,11 @@ if (!isAllowedWebsite) {
 }
 
 
-async function isCurrentSiteBlocked() {
-  return new Promise(resolve => {
-    chrome.runtime.sendMessage({ type: 'CHECK_URL' }, response => {
-      resolve(response.isBlocked);
-    });
-  });
-}
-
-async function initializeBlocker() {
-  // Only proceed if the current site is blocked
-  const isBlocked = await isCurrentSiteBlocked();
-  if (!isBlocked) return;
-
-  // Block file uploads
+function blockFileUpload() {
+  // Intercept all file input elements
   document.addEventListener('change', function(event) {
     if (event.target.type === 'file') {
+      console.log(event.target);
       const files = event.target.files;
       
       for (let i = 0; i < files.length; i++) {
@@ -43,8 +34,13 @@ async function initializeBlocker() {
         const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
         
         if (blockedExtensions.includes(fileExtension)) {
+          // Prevent the upload
           event.target.value = '';
-          alert(`Upload blocked: ${fileExtension} files are not allowed on this website.`);
+          
+          // Show alert to user
+          alert(`Upload blocked: ${fileExtension} files are not allowed.`);
+          
+          // Stop the event
           event.preventDefault();
           event.stopPropagation();
           break;
@@ -53,57 +49,63 @@ async function initializeBlocker() {
     }
   }, true);
 
-  // Block drag and drop
-  document.addEventListener('dragover', function(event) {
-    event.preventDefault();
-  }, true);
+  // Block drag and drop uploads
+  // document.addEventListener('dragover', function(event) {
+  //   event.preventDefault();
+  // }, true);
 
-  document.addEventListener('drop', function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    alert('File uploads are not allowed on this website.');
-  }, true);
-
-  // Disable all file inputs
-  const disableFileInputs = () => {
-    const fileInputs = document.querySelectorAll('input[type="file"]');
-    fileInputs.forEach(input => {
-      input.disabled = true;
-      input.style.opacity = '0.5';
-      
-      // Add a tooltip
-      input.title = 'File uploads are not allowed on this website';
-      
-      // Add a visual indicator next to the input
-      const warning = document.createElement('span');
-      warning.textContent = '⚠️ Uploads disabled';
-      warning.style.marginLeft = '10px';
-      warning.style.color = 'red';
-      input.parentNode.insertBefore(warning, input.nextSibling);
-    });
-  };
-
-  // Run immediately and observe DOM changes
-  disableFileInputs();
-  new MutationObserver(disableFileInputs).observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  // document.addEventListener('drop', function(event) {
+  //   const items = event.dataTransfer?.items;
+    
+  //   if (items) {
+  //     for (let i = 0; i < items.length; i++) {
+  //       if (items[i].kind === 'file') {
+  //         const file = items[i].getAsFile();
+  //         const fileName = file.name.toLowerCase();
+  //         const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+          
+  //         if (blockedExtensions.includes(fileExtension)) {
+  //           event.preventDefault();
+  //           event.stopPropagation();
+  //           alert(`Upload blocked: ${fileExtension} files are not allowed.`);
+  //           break;
+  //         }
+  //       }
+  //     }:
+  //   }
+  // }, true);
 }
-
-
 
 // Initialize as soon as possible
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeBlocker);
+  document.addEventListener('DOMContentLoaded', blockFileUpload);
 } else {
-  initializeBlocker();
+  blockFileUpload();
 }
+
+
 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "UPDATE_EXTENSIONS") {
-    console.log("Received extensions in content.js:", message.data);
-    // Handle the extensions in the content script
+    blockedExtensions = message.data; // Update the local extensions list
+    console.log("Updated extensions in content.js:", blockedExtensions);
+
+    // Perform any custom logic using the updated extensions
+    // For example, filter links or files on the page
+    handleUpdatedExtensions(blockedExtensions);
+
+    sendResponse({ success: true });
   }
 });
+
+function handleUpdatedExtensions(extensions) {
+  // Example: Highlight links on the page matching the extensions
+  const links = document.querySelectorAll("a");
+  links.forEach((link) => {
+    const href = link.getAttribute("href");
+    if (href && extensions.some((ext) => href.endsWith(ext))) {
+      link.style.backgroundColor = "yellow"; // Highlight matching links
+    }
+  });
+}
