@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "My Chrome Extension",
+    "description": "A Chrome extension built with React and Vite",
+    "version": "1.0.0",
+    "action": {
+      "default_popup": "index.html"
+    },
+   "permissions": [
+    "storage",
+    "downloads","downloads.shelf"],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["*://*/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "host_permissions": [
+    "*://*/*"
+  ]
+  }
+  
