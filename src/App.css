@@ -40,3 +40,67 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Global styling for dark mode */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+}
+
+/* App container */
+.app {
+  padding: 16px;
+  max-width: 400px;
+  margin: auto;
+  text-align: center;
+}
+
+/* Input container */
+.input-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+button {
+  padding: 8px 12px;
+  background-color: #333;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #444;
+}
+
+/* Extensions list */
+.extensions-list {
+  list-style: none;
+  padding: 0;
+}
+
+.extension-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #1e1e1e;
+  margin-bottom: 8px;
+}
+

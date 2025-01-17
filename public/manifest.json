@@ -8,7 +8,7 @@
     },
    "permissions": [
     "storage",
-    "downloads","downloads.shelf"],
+    "downloads","downloads.shelf", "scripting", "activeTab"],
     "background": {
       "service_worker": "background.js"
     },
@@ -19,7 +19,7 @@
       }
     ],
     "host_permissions": [
-    "*://*/*"
+    "<all_urls>"
   ]
   }
   

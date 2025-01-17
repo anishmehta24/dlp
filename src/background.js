@@ -1,7 +1,12 @@
-const blockedExtensions = [".pdf", ".docx", ".xls"]; // Blocked file types
-const approvedWebsites = ["https://example.com"]; // Approved domains
+const blockedExtensions = [".pdf", ".docx", ".xls"]; 
+const approvedWebsites = ["https://example.com"]; 
+const blockedSites = [
+  'example.com',
+  'blocked-site.com',
+  // Add more sites as needed
+];
 
-// Intercept downloads
+
 chrome.downloads.onCreated.addListener((downloadItem) => {
     try {
 
@@ -22,6 +27,16 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
         console.error("Unexpected error:", error.message);
     }
   
+});
+
+function isBlockedSite(url) {
+  return blockedSites.some(site => url.includes(site));
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'CHECK_URL') {
+    sendResponse({ isBlocked: isBlockedSite(sender.tab.url) });
+  }
 });
 
 // Get the file extension
@@ -49,3 +64,15 @@ function notifyUser(title, message) {
     message: message
   });
 }
+
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("Virtual Upload Queue Extension Installed");
+});
+
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "UPDATE_EXTENSIONS") {
+    console.log("Updated extensions in background:", message.data);
+    // You can handle logic for background.js here
+  }
+});
