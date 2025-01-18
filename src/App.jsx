@@ -136,6 +136,28 @@ const App = () => {
           Add Extension
         </button>
       </div>
+      <div className="radio-buttons">
+          <label>
+            <input
+              type="radio"
+              name="column"
+              value="upload"
+              checked={selectedColumn === "upload"}
+              onChange={(e) => setSelectedColumn(e.target.value)}
+            />
+            Block Upload
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="column"
+              value="download"
+              checked={selectedColumn === "download"}
+              onChange={(e) => setSelectedColumn(e.target.value)}
+            />
+            Block Download
+          </label>
+        </div>
       <div className="input-container">
         <input
           type="text"
