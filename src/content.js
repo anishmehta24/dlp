@@ -15,39 +15,73 @@ if (!isAllowedWebsite) {
     if (blockedExtensions.includes(`.${fileExtension}`)) {
       link.addEventListener('click', (e) => {
         e.preventDefault(); // Prevent the download
-        alert(`Downloading files with the extension .${fileExtension} is blocked on this website.`);
+        showCustomAlert(`Downloading files with the extension .${fileExtension} is blocked on this website.`);
       });
     }
   });
 }
 
+const alertContainer = document.createElement('div');
+alertContainer.id = 'custom-alert';
+alertContainer.style.position = 'fixed';
+alertContainer.style.top = '20px';
+alertContainer.style.left = '50%';
+alertContainer.style.transform = 'translateX(-50%)';
+alertContainer.style.backgroundColor = '#ff4d4d';
+alertContainer.style.color = '#fff';
+alertContainer.style.padding = '10px 20px';
+alertContainer.style.borderRadius = '5px';
+alertContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+alertContainer.style.fontSize = '14px';
+alertContainer.style.zIndex = '1000';
+alertContainer.style.display = 'none';
+document.body.appendChild(alertContainer);
+
+// Show the custom alert message
+function showCustomAlert(message) {
+  alertContainer.textContent = message;
+  alertContainer.style.display = 'block';
+
+  // Automatically hide the alert after 3 seconds
+  setTimeout(() => {
+    alertContainer.style.display = 'none';
+  }, 3000);
+}
+
 
 function blockFileUpload() {
-  // Intercept all file input elements
-  document.addEventListener('change', function(event) {
-    if (event.target.type === 'file') {
-      console.log(event.target);
-      const files = event.target.files;
-      
-      for (let i = 0; i < files.length; i++) {
-        const fileName = files[i].name.toLowerCase();
-        const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+
+  document.addEventListener(
+    "change",
+    function (event) {
+      if (event.target.type === "file") {
+        const files = event.target.files;
+
+        for (let i = 0; i < files.length; i++) {
+          const fileName = files[i].name.toLowerCase();
+          const fileExtension = fileName.substring(fileName.lastIndexOf("."));
+
+          if (blockedExtensions.includes(fileExtension)) {
+
         
-        if (blockedExtensions.includes(fileExtension)) {
-          // Prevent the upload
-          event.target.value = '';
-          
-          // Show alert to user
-          alert(`Upload blocked: ${fileExtension} files are not allowed.`);
-          
-          // Stop the event
-          event.preventDefault();
-          event.stopPropagation();
-          break;
+            event.target.value = "";
+
+            // Show modal to the user
+            showCustomAlert(
+              `WARNING! Upload blocked: ${fileExtension} files are not allowed.` 
+            );
+
+            // Stop the event until the user makes a choice
+            event.preventDefault()
+            event.stopPropagation()
+            break;
+          }
         }
       }
-    }
-  }, true);
+    },
+    true
+  );
+}
 
   // Block drag and drop uploads
   // document.addEventListener('dragover', function(event) {
@@ -74,7 +108,7 @@ function blockFileUpload() {
   //     }:
   //   }
   // }, true);
-}
+
 
 // Initialize as soon as possible
 if (document.readyState === 'loading') {
